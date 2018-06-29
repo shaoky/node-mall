@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import jwt from 'jsonwebtoken'
 import advertising from '../../../models/admin/advertising/index'
 // import register from '../../../models/admin/login/register'
 
@@ -12,96 +11,44 @@ class Advertising {
     */
     index (req, res, next) {
         const query = req.query
-        console.log('登录参数1---------', query)
-        if (query.userName == '') {
-            res.send({
-                message: '请输入账号'
-            })
-            return
-        }
-        advertising.findOne({
-            userName: query.userName
-        }, (err, user) => {
-            if (err) {
-                throw err
-            }
-            if (!user) {
-                res.send({
-                    message: '用户不存在！'
-                })
-                return
-            }
-            // 检查密码是否正确
-            if (query.password == user.password) {
-                user.token = jwt.sign({name: user.name}, 'shaoky')
-                user.save((err) => {
-                    if (err) {
-                        res.send(err)
-                    }
-                })
-                res.send({
-                    data: {
-                        user: {
-                            token: user.token
-                        }
-                    },
-                    error_no: 0,
-                    message: ''
-                })
-            } else {
-                res.send({
-                    error_no: 50000,
-                    message: '密码错误'
-                })
-            }
+        console.log('列表参数---------', query)
+        res.send({
+            list: [{
+                a: 1
+            }]
         })
     }
-    add (req, res, next) {
-        console.log(1)
-        const query = req.query
-        console.log('登录参数1---------', query)
-        if (query.userName == '') {
+
+    async list (req, res, next) {
+        // console.log(req.query)
+        try {
+            const adList = await advertising.find({}, null, {sort: [['order', -1]]}, '-_id')
+            console.log(adList)
             res.send({
-                message: '请输入账号'
+                status: 200,
+                data: adList
             })
-            return
+        } catch (err) {
+            res.send({
+                message: '获取广告列表失败'
+            })
         }
-        advertising.findOne({
-            userName: query.userName
-        }, (err, user) => {
-            if (err) {
-                throw err
-            }
-            if (!user) {
-                res.send({
-                    message: '用户不存在！'
-                })
-                return
-            }
-            // 检查密码是否正确
-            if (query.password == user.password) {
-                user.token = jwt.sign({name: user.name}, 'shaoky')
-                user.save((err) => {
-                    if (err) {
-                        res.send(err)
-                    }
-                })
-                res.send({
-                    data: {
-                        user: {
-                            token: user.token
-                        }
-                    },
-                    error_no: 0,
-                    message: ''
-                })
-            } else {
-                res.send({
-                    error_no: 50000,
-                    message: '密码错误'
-                })
-            }
-        })
+    }
+
+    async add (req, res, next) {
+        // console.log(req.query)
+        // try {
+        //     const adList = await advertising.find({}, null, {sort: [['_id', 1]]}, '-_id')
+        //     console.log(adList)
+        //     res.send({
+        //         status: 200,
+        //         data: adList
+        //     })
+        // } catch (err) {
+        //     res.send({
+        //         message: '获取广告列表失败'
+        //     })
+        // }
     }
 }
 

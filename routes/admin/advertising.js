@@ -9,6 +9,7 @@ const router = express.Router()
 //     })
 //     return
 // })
-router.post('/api/admin/v1/advertising/getList', Advertising.add)
+router.get('/admin/advertising/list', Advertising.list)
+router.post('/admin/advertising/add', Advertising.add)
 
 export default router
