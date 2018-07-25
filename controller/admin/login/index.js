@@ -1,38 +1,49 @@
 import mongoose from 'mongoose'
 import jwt from 'jsonwebtoken'
-import login from '../../../models/admin/login/index'
-// import register from '../../../models/admin/login/register'
+import AdminModel from '../../../models/admin/admin'
+import Base from '../../../prototype/base'
 
-class Login {
+class Login extends Base{
     constructor () {
-        // this.index()
+        super()
+        this.register = this.register.bind(this)
     }
     /*
     *
     */
     index (req, res, next) {
-        const query = req.query
-        console.log('登录参数---------', query)
-        if (query.userName == '') {
+        const params = req.body
+        console.log('登录参数---------', params)
+        if (params.userName == '') {
             res.send({
+                code: 400,
                 message: '请输入账号'
             })
             return
         }
-        login.findOne({
-            userName: query.userName
+        if (params.password == '') {
+            res.send({
+                code: 400,
+                message: '请输入密码'
+            })
+            return
+        }
+        AdminModel.findOne({
+            userName: params.userName
         }, (err, user) => {
             if (err) {
                 throw err
             }
             if (!user) {
                 res.send({
-                    message: '用户不存在！'
+                    code: 0,
+                    message: '用户不存在'
                 })
                 return
             }
+
             // 检查密码是否正确
-            if (query.password == user.password) {
+            if (params.password == user.password) {
                 user.token = jwt.sign({name: user.name}, 'shaoky')
                 user.save((err) => {
                     if (err) {
@@ -45,66 +56,56 @@ class Login {
                             token: user.token
                         }
                     },
-                    error_no: 0,
-                    message: ''
+                    code: 200
                 })
             } else {
                 res.send({
-                    error_no: 50000,
+                    code: 400,
                     message: '密码错误'
                 })
             }
         })
     }
-    register (req, res, next) {
-        const userName = req.query.userName
-        if (!req.query.userName || !req.query.password) {
-            req.send({error_no: 0, message: '请输入您的账号密码'})
+    async register (req, res, next) {
+        const userName = req.body.userName
+        const password = req.body.password
+        if (!userName || !password) {
+            res.send({code: 400, message: '请输入您的账号密码'})
+            return
         }
-        const admin = login.findOne({
-            userName: userName
-        }, (err, user) => {
-            if (err) {
-                console.log('err')
-                throw err
-            }
-            if (user) {
-                console.log(11)
-            }
-        })
-        // if (admin) {
-        //  res.send({
-        //      error_no: 0,
-        //      message: '该用户已经存在'
-        //  })
-        //  return
-        // }
-        // let newUser = new login({
-        //  userName: userName,
-        //  password: req.query.password
-        // })
-        // newUser.save((err) => {
-        //  if (err) {
-        //      res.send(err)
-        //  }
-        //  res.send({
-        //      error_no: 0,
-        //      message: '成功创建新用户！'
-        //  })
-        // })
-        // const Schema = mongoose.Schema;
-        // var schema = new mongoose.Schema({ num:Number, name: String, size: String});
-        // 创建模型
-        // const statisSchema = new Schema({
-        //  date: String,
-        //  origin: String,
-        //  id: Number,
-        // })
-        // const MyModel = mongoose.model('MyModel', statisSchema)
-        // var doc1 = new MyModel({ size: '2' });
-        // doc1.save(function (err, doc) {
-        //  console.log(doc)
-        // })
+        const admin = await AdminModel.findOne({userName: userName})
+        if (admin) {
+            res.send({
+                code: 400,
+                message: '该用户已经存在'
+            })
+            return
+        }
+        
+        let adminId
+        try {
+            adminId = await this.getId('admin_id')
+        } catch (err) {
+            console.log('获取admin_id失败')
+            throw new Error(err)
+        }
+
+        try {
+            await AdminModel.create({
+                id: adminId,
+                userName: userName,
+                password: password
+            })
+            res.send({
+                code: 200,
+                message: '成功创建新用户'
+            })
+        } catch (err) {
+            res.send({
+                code: 0,
+                message: '操作失败'
+            })
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import jwt from 'jsonwebtoken'
-import advertisingType from '../../../models/admin/advertising/type'
+import advertisingType from '../../../models/advertising/type'
 
 class advertisingType {
     constructor () {
@@ -11,7 +11,7 @@ class advertisingType {
     */
     index (req, res, next) {
         const query = req.query
-        console.log('登录参数1---------', query)
+        console.log('登录参数---------', query)
         if (query.userName == '') {
             res.send({
                 message: '请输入账号'
