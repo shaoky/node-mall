@@ -4,6 +4,7 @@ const Schema  = mongoose.Schema
 
 // 创建模型
 const idsSchema = new Schema({
+    image_id: Number,
     advertising_id: Number,
     admin_id: Number,
     goods_id: Number
@@ -19,6 +20,7 @@ Ids.findOne((err, data) => {
     // }
     if (!data) {
         const newIds = new Ids({
+            image_id: 0,
             advertising_id: 0,
             admin_id: 0,
             goods_id: 0

@@ -1,0 +1,15 @@
+{
+  // Customer module configs
+  "Customer": {
+    "dbConfig": {
+      "host": "http://192.168.3.58:3000/",
+      "port": 5984,
+      "dbName": "customers"
+    },
+    "credit": {
+      "initialLimit": 100,
+      // Set low for development
+      "initialDays": 1
+    }
+  }
+}
