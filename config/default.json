@@ -6,6 +6,15 @@
       "port": 5984,
       "dbName": "customers"
     },
+    "global": {
+      // "imageHost": "http://192.168.3.58:3000/images/"
+      "imageHost": "https://shaoky.mynatapp.cc/images/",
+      "tokenKey": "shaoky"
+    },
+    "wx": {
+      "appid": "wxfc52cc97c9caf877",
+      "secret": "e486759aded0fd518bcfb72c4b15b95b"
+    },
     "credit": {
       "initialLimit": 100,
       // Set low for development

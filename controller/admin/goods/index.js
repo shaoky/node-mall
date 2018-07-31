@@ -65,6 +65,8 @@ class Goods extends BaseComponent {
                 goodsName: params.goodsName || '',
                 goodsImage: params.goodsImage || '',
                 goodsThums: params.goodsThums || '',
+                goodsImageBanner: params.goodsImageBanner || [],
+                goodsImageDetail: params.goodsImageDetail || [],
                 marketPrice: params.marketPrice || 0,
                 shopPrice: params.shopPrice || 0,
                 goodsStock: params.goodsStock || 0,

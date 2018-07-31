@@ -3,12 +3,70 @@ import formidable from 'formidable'
 import gm from 'gm'
 import fs from 'fs'
 import path from 'path'
+import fetch from 'node-fetch'
+import config from 'config'
+import jwt from 'jsonwebtoken'
 
 export default class BaseComponent {
     constructor () {
-		this.idList = ['image_id', 'advertising_id', 'admin_id', 'goods_id']
+		this.idList = ['image_id', 'advertising_id', 'admin_id', 'goods_id', 'user_id', 'address_id', 'cart_id', 'order_id']
 		this.uploadImg = this.uploadImg.bind(this)
-    }
+	}
+
+	async fetch(url = '', data = {}, type = 'GET', resType = 'JSON'){
+		type = type.toUpperCase();
+		resType = resType.toUpperCase();
+		if (type == 'GET') {
+			let dataStr = ''; //数据拼接字符串
+			Object.keys(data).forEach(key => {
+				dataStr += key + '=' + data[key] + '&';
+			})
+
+			if (dataStr !== '') {
+				dataStr = dataStr.substr(0, dataStr.lastIndexOf('&'));
+				url = url + '?' + dataStr;
+			}
+		}
+
+		let requestConfig = {
+			method: type,
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+		}
+
+		if (type == 'POST') {
+			Object.defineProperty(requestConfig, 'body', {
+				value: JSON.stringify(data)
+			})
+		}
+		let responseJson;
+		try {
+			const response = await fetch(url, requestConfig);
+			if (resType === 'TEXT') {
+				responseJson = await response.text();
+			}else{
+				responseJson = await response.json();
+			}
+		} catch (err) {
+			console.log('获取http数据失败', err);
+			throw new Error(err)
+		}
+		return responseJson
+	}
+
+	// 获取用户id
+
+	getUserId (token) {
+		
+        let tokenKey = config.get('Customer.global.tokenKey')
+        let decoded = jwt.verify(token, tokenKey)
+		let userId = decoded.id
+		console.log(userId)
+		return userId
+	}
+
     //获取id列表
 	async getId(type){
 		if (!this.idList.includes(type)) {
@@ -24,7 +82,7 @@ export default class BaseComponent {
 			await idData.save()
 			return idData[type]
 		} catch (err) {
-			console.log('获取ID数据失败');
+			console.log(`获取${type}数据失败`);
 			throw new Error(err)
 		}
 	}
@@ -50,7 +108,7 @@ export default class BaseComponent {
 	async getImagePath (req, res) {
 		return new Promise((resolve, reject) => {
 			const form = formidable.IncomingForm()
-			form.uploadDir = './public/images'
+			form.uploadDir = './pubilc/images'
 			form.parse(req, async (err, fields, files) => {
 				let image_id
 				try {
@@ -72,7 +130,7 @@ export default class BaseComponent {
 					return
 				}
 				const fullName = hashName + extname
-				const repath = './public/images/' + fullName
+				const repath = './pubilc/images/' + fullName
 				try {
 					fs.renameSync(files.file.path, repath)
 					// gm(repath)

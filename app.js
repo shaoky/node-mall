@@ -1,6 +1,7 @@
 import express from 'express'
 import db from './mongodb/db.js'
-import router from './routes/admin/main.js'
+import routerAdmin from './routes/admin/main.js'
+import routerApp from './routes/app/main.js'
 import chalk from 'chalk'
 import morgan from 'morgan'
 import bodyParser from 'body-parser'
@@ -24,8 +25,10 @@ app.all('*', (req, res, next) => {
     next()
 })
 
-router(app)
+routerAdmin(app)
+routerApp(app)
 
+app.use(express.static('pubilc'))
 var server = app.listen(3000, function () {
     var host = server.address().address
     var port = server.address().port

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import config from 'config'
 import advertising from '../../../models/advertising/index'
 import BaseComponent from '../../../prototype/base'
 // import moment from 'moment'
@@ -37,10 +38,13 @@ class Advertising extends BaseComponent {
     }
 
     async list (req, res, next) {
-        // console.log(req.query)
-        const {page = 1, size = 0} = req.query
+        const dbConfig = config.get('Customer.global')
+        const {page = 1, size = 0} = req.body
         try {
-            const adList = await advertising.find({}, '-_id').sort({order: -1}).skip(Number(page)).limit(Number(size))
+            const adList = await advertising.find({}, '-_id').sort({order: -1}).skip(Number(page*size)).limit(Number(size))
+            adList.forEach(item => {
+                item.imageUrl = dbConfig.imageHost + item.imageUrl
+            })
             res.send({
                 code: 200,
                 data: adList
@@ -54,11 +58,13 @@ class Advertising extends BaseComponent {
     }
 
     async add (req, res, next) {
-        console.log(req.body)
-        let form = req.body
+        let params = req.body
         try {
-            if (!form.title) {
+            if (!params.title) {
                 throw new Error('请输入标题');
+            }
+            if (!params.imageUrl) {
+                throw new Error('请添加图片')
             }
         } catch (err) {
             console.log('前台参数错误:', err.message)
@@ -72,15 +78,20 @@ class Advertising extends BaseComponent {
 
         try {
             let id = await this.getId('advertising_id')
-            form.id = id
+            params.id = id
         } catch (err) {
             console.log('获取advertising_id失败')
             throw new Error(err)
         }
 
         try {
-            form.createTime = parseInt(new Date() / 1000)
-            await advertising.create(form)
+            await advertising.create({
+                id: params.id,
+                title: params.title,
+                imageUrl: params.imageUrl,
+                order: params.order || 100,
+                createTime: parseInt(new Date() / 1000)
+            })
             res.send({
                 code: 200,
                 message: '操作成功'

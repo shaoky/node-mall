@@ -6,6 +6,7 @@ const Schema  = mongoose.Schema
 const advertisingSchema = new Schema({
     id: Number,
     title: String,
+    imageUrl: String,
     order: Number,
     createTime: Number,
 },{ collection: 'advertising' })

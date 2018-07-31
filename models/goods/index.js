@@ -9,10 +9,12 @@ const goodsSchema = new Schema({
     goodsName: String, // 商品名称
     goodsImage: String, // 商品图片
     goodsThums: String, // 商品缩略图
+    goodsImageBanner: Array, // 商品轮播图
+    goodsImageDetail: Array, // 商品详情图
     marketPrice: String, // 市场价格
     shopPrice: String, // 商品价格
     goodsStock: String, // 商品库存
-    saleCount: String, // 销售总数
+    saleCount: Number, // 销售总数
     goodsDesc: String, // 商品详情
     goodsStatus: Number, // 商品状态|-1:禁售 0:未审核 1:已审核
     createTime: Number, // 创建时间

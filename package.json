@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pm2": "pm2 start proesses.json"
   },
   "author": "",
   "license": "ISC",
@@ -19,7 +20,8 @@
     "jsonwebtoken": "^8.2.1",
     "moment": "^2.22.2",
     "mongoose": "^5.1.5",
-    "morgan": "^1.9.0"
+    "morgan": "^1.9.0",
+    "node-fetch": "^2.2.0"
   },
   "devDependencies": {
     "babel": "^6.23.0",
