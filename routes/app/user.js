@@ -8,6 +8,7 @@ router.post('/user/register', User.register)
 router.post('/address/list', Address.list)
 router.post('/address/add', Address.add)
 router.post('/address/delete', Address.delete)
+router.post('/address/default', Address.getAddressDefault)
 router.post('/address/setDefault', Address.setAddressDefault)
 
 export default router

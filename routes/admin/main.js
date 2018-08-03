@@ -1,9 +1,9 @@
 import login from './login'
-import advertising from './advertising'
+// import ad from './ad'
 import goods from './goods'
 
 export default app => {
 	app.use('/', login),
-	app.use('/', advertising),
+	// app.use('/', ad),
 	app.use('/', goods)
 }

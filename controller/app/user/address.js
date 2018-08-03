@@ -1,16 +1,35 @@
 import mongoose from 'mongoose'
 import AddressModel from '../../../models/user/address'
-import Base from '../../../prototype/base'
+import BaseComponent from '../../../prototype/base'
 
-class Address extends Base {
+/**
+ * @apiDefine appAddresGroup app-地址
+ */
+
+/**
+ * @api {post} / 0. 地址表
+ * @apiName goods
+ * @apiGroup appAddresGroup
+ * @apiSuccess {Number} addressId 地址id
+ * @apiVersion 1.0.0
+ */
+class Address extends BaseComponent {
     constructor () {
         super()
         this.add = this.add.bind(this)
+        this.getAddressDefault = this.getAddressDefault.bind(this)
         this.setAddressDefault = this.setAddressDefault.bind(this)
     }
-    /*
-    *
-    */
+    /**
+     * @api {post} /address/list 1. 地址列表
+     * @apiName addressList
+     * @apiGroup appAddressGroup
+     * @apiHeader {String} Authorization token
+     * @apiParam {Number} page = 0 页面
+     * @apiParam {Number} size = 20 数量
+     * @apiSuccess {Array} data 见地址表
+     * @apiVersion 1.0.0
+     */
     async list (req, res, next) {
         const {page = 0, size = 20} = req.body
         try {
@@ -56,7 +75,7 @@ class Address extends Base {
         try {
             form.createTime = parseInt(new Date() / 1000)
             await AddressModel.create({
-                id: form.id,
+                addressId: form.id,
                 userId: userId,
                 userName: form.userName,
                 userPhone: form.telNumber,
@@ -65,7 +84,7 @@ class Address extends Base {
                 countyName: form.countyName,
                 detailInfo: form.detailInfo,
                 postalCode: form.postalCode,
-                isDefault: false
+                // createTime: parseInt(new Date() / 1000),
             })
             res.send({
                 code: 200,
@@ -92,7 +111,7 @@ class Address extends Base {
         }
 
         try {
-            let del = await AddressModel.findOneAndRemove({ id: addressId })
+            let del = await AddressModel.findOneAndRemove({ addressId: addressId })
             if (del) {
                 res.send({
                     code: 200,
@@ -112,16 +131,50 @@ class Address extends Base {
             })
         }
     }
-
-    async setAddressDefault (req, res, next) {
+    /**
+     * @api {post} /address/default 3. 默认地址
+     * @apiName addressDefault
+     * @apiGroup appAddressGroup
+     * @apiHeader {String} Authorization token
+     * @apiSuccess {Object} data 见地址表
+     * @apiVersion 1.0.0
+     */
+    async getAddressDefault (req, res, next) {
         // let token = req.get('Authorization')
         // let tokenKey = config.get('Customer.global.tokenKey')
         // let decoded = jwt.verify(token, tokenKey)
         // let user_id = decoded.id
         let userId = this.getUserId(req.get('Authorization'))
         try {
+            let addressInfo = await AddressModel.findOne({userId: userId}, '-_id')
+            console.log(addressInfo)
+            if (addressInfo) {
+                res.send({
+                    code: 200,
+                    data: addressInfo
+                })
+            } else {
+                res.send({
+                    code: 200,
+                    data: {
+                        isDefault: false
+                    }
+                })
+            }
+            
+        } catch (err) {
+            res.send({
+                code: 400,
+                message: '更新失败'
+            })
+        }
+    }
+
+    async setAddressDefault (req, res, next) {
+        let userId = this.getUserId(req.get('Authorization'))
+        try {
             await AddressModel.update({userId: userId}, {isDefault: false}, {multi: true})
-            await AddressModel.findOneAndUpdate({id: req.body.id, userId: userId}, {$set: {isDefault: true}})
+            await AddressModel.findOneAndUpdate({addressId: req.body.id, userId: userId}, {$set: {isDefault: true}})
             res.send({
                 code: 200,
                 message: '操作成功'

@@ -9,8 +9,15 @@ import jwt from 'jsonwebtoken'
 
 export default class BaseComponent {
     constructor () {
-		this.idList = ['image_id', 'advertising_id', 'admin_id', 'goods_id', 'user_id', 'address_id', 'cart_id', 'order_id']
+		this.idList = ['image_id', 'ad_id', 'ad_type_id', 'admin_id', 'goods_id', 'user_id', 'address_id', 'cart_id', 'order_id']
 		this.uploadImg = this.uploadImg.bind(this)
+	}
+
+	systemConfig () {
+		let config = {
+			deliverMoney: 10
+		}
+		return config
 	}
 
 	async fetch(url = '', data = {}, type = 'GET', resType = 'JSON'){
@@ -59,11 +66,10 @@ export default class BaseComponent {
 	// 获取用户id
 
 	getUserId (token) {
-		
         let tokenKey = config.get('Customer.global.tokenKey')
         let decoded = jwt.verify(token, tokenKey)
 		let userId = decoded.id
-		console.log(userId)
+		console.log('userId:', userId)
 		return userId
 	}
 

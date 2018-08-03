@@ -24,21 +24,13 @@ class Mini extends Base {
         }
         let wx = await this.fetch(url, data)
 
-        let userId
-        try {
-            userId = await this.getId('user_id')
-        } catch (err) {
-            console.log('user失败')
-            throw new Error(err)
-        }
+        
         
         try {
             let tokenKey = config.get('Customer.global.tokenKey')
             let wxInfo = await UserModel.findOne({openid: wx.openid}, ['-id', '-sessionKey', '-openid'])
-            let token = jwt.sign({id: userId}, tokenKey)
-            // console.log(token)
-            // wxInfo.token = token
             if (wxInfo) {
+                let token = jwt.sign({id: wxInfo.userId}, tokenKey)
                 wxInfo.token = token
                 await wxInfo.save()
                 res.send({
@@ -46,8 +38,16 @@ class Mini extends Base {
                     data: wxInfo
                 })
             } else {
+                let userId
+                try {
+                    userId = await this.getId('user_id')
+                } catch (err) {
+                    console.log('user失败')
+                    throw new Error(err)
+                }
+                let token = jwt.sign({id: userId}, tokenKey)
                 await UserModel.create({
-                    id: userId,
+                    userId: wxInfo.userId,
                     openid: wx.openid,
                     sessionKey: wx.session_key,
                     nickname: params.nickname,

@@ -8,9 +8,6 @@ class Goods extends BaseComponent {
         super()
         this.add = this.add.bind(this)
     }
-    /*
-    *
-    */
     async list (req, res, next) {
         const dbConfig = config.get('Customer.dbConfig')
         const {page = 0, size = 20} = req.query
@@ -60,7 +57,7 @@ class Goods extends BaseComponent {
 
         try {
             await goodsModel.create({
-                id: goodsId,
+                goodsId: goodsId,
                 goodsSn: params.goodsSn || '',
                 goodsName: params.goodsName || '',
                 goodsImage: params.goodsImage || '',
@@ -73,11 +70,7 @@ class Goods extends BaseComponent {
                 saleCount: params.saleCount || 0,
                 goodsDesc: params.goodsDesc || '',
                 goodsStatus: params.goodsStatus || 0,
-                createTime: parseInt(new Date() / 1000),
                 // saleTime: params.saleTime,
-                isSale: params.isSale || false,
-                isHot: params.isHot || false,
-                goodsFlag: 1,
                 order: params.order || 100
             })
             res.send({
@@ -157,7 +150,7 @@ class Goods extends BaseComponent {
         }
 
         try {
-            await goodsModel.findOneAndUpdate({id: req.body.id}, {$set: form})
+            await goodsModel.findOneAndUpdate({goodsId: req.body.id}, {$set: form})
             res.send({
                 code: 200,
                 message: '更新成功'

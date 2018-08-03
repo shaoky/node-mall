@@ -4,7 +4,7 @@ const Schema  = mongoose.Schema
 
 // 创建模型
 const userSchema = new Schema({
-    id: Number,
+    userId: Number,
     nickname: String,
     userName: String,
     password: String,

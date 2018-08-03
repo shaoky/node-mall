@@ -10,6 +10,8 @@ class Cart extends BaseComponent {
         this.dbConfig = config.get('Customer.global')
         this.cartList = this.cartList.bind(this)
         this.cartAdd = this.cartAdd.bind(this)
+        this.cartDelete = this.cartDelete.bind(this)
+        this.cartUpdate = this.cartUpdate.bind(this)
     }
     /*
     *
@@ -18,13 +20,17 @@ class Cart extends BaseComponent {
         let userId = this.getUserId(req.get('Authorization'))
         const {page = 0, size = 20} = req.body
         try {
-            let list = await CartModel.findOne({userId: userId}, '-_id')
-            for (let item of list.goodsList) {
-                item.goodsInfo = await GoodsModel.findOne({id: item.goodsId}, '-_id')
+            let list = await CartModel.findOne({userId: userId}, ['-_id', '-createTime', '-userId'])
+
+            if (list) {
+                for (let item of list.goodsList) {
+                    item.goodsInfo = await GoodsModel.findOne({id: item.goodsId}, '-_id')
+                    item.goodsInfo.goodsImage = this.dbConfig.imageHost + item.goodsInfo.goodsImage
+                }
             }
             res.send({
                 code: 200,
-                data: list
+                data: list || []
             })
         } catch (err) {
             console.log('err', err)
@@ -42,7 +48,7 @@ class Cart extends BaseComponent {
         params.goodsNum = parseInt(params.goodsNum)
         try {
             if (!params.goodsId) {
-                throw new Error('无效的商品');
+                throw new Error('商品id不存在');
             }
             if (params.goodsNum < 1) {
                 throw new Error('商品数量不能低于1');
@@ -123,6 +129,84 @@ class Cart extends BaseComponent {
                     message: '添加失败'
                 })
             }
+        }
+    }
+
+    async cartDelete (req, res, next) {
+        let userId = this.getUserId(req.get('Authorization'))
+        let goodsId = req.body.goodsId
+
+        if (!goodsId || !Number(goodsId)) {
+            console.log('goodsId参数错误')
+            res.send({
+                code: 400,
+                message: 'id参数错误'
+            })
+            return
+        }
+
+        try {
+            let cartInfo = await CartModel.findOne({userId: userId}, '-_id')
+            
+            let list = new Set(cartInfo.goodsList)
+            for (let item of list) {
+                if (item.goodsId === goodsId) {
+                    list.delete(item)
+                }
+            }
+            await CartModel.findOneAndUpdate({userId: userId}, {$set: {goodsList: [...list]}})
+            res.send({
+                code: 200,
+                message: '删除成功'
+            })
+        } catch (err) {
+            res.send({
+                code: 400,
+                message: '删除失败'
+            })
+        }
+    }
+
+    async cartUpdate (req, res, next) {
+        let userId = this.getUserId(req.get('Authorization'))
+        let params = req.body
+        
+        try {
+            if (!params.goodsId || !Number(params.goodsId)) {
+                throw new Error('goodsId参数错误');
+            }
+            if (params.goodsNum < 1 || !Number(params.goodsNum)) {
+                throw new Error('商品数量不能低于1');
+            }
+        } catch (err) {
+            console.log('前台参数错误:', err.message)
+            res.send({
+                code: 400,
+                message: err.message
+            })
+            return
+        }
+
+        try {
+            let cartInfo = await CartModel.findOne({userId: userId}, '-_id')
+            console.log(cartInfo)
+            // let list = new Set(cartInfo.goodsList)
+            for (let item of cartInfo.goodsList) {
+                if (item.goodsId === params.goodsId) {
+                    item.goodsNum = params.goodsNum
+                }
+            }
+            console.log(cartInfo.goodsList)
+            await CartModel.findOneAndUpdate({userId: userId}, {$set: {goodsList: cartInfo.goodsList}})
+            res.send({
+                code: 200,
+                message: '修改成功'
+            })
+        } catch (err) {
+            res.send({
+                code: 400,
+                message: '修改失败'
+            })
         }
     }
 }

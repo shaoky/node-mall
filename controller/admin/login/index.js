@@ -8,9 +8,6 @@ class Login extends Base{
         super()
         this.register = this.register.bind(this)
     }
-    /*
-    *
-    */
     index (req, res, next) {
         const params = req.body
         console.log('登录参数---------', params)
