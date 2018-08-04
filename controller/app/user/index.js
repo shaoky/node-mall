@@ -2,7 +2,17 @@ import mongoose from 'mongoose'
 import jwt from 'jsonwebtoken'
 import UserModel from '../../../models/user/user'
 import Base from '../../../prototype/base'
+/**
+ * @apiDefine appUserGroup app-用户模块
+ */
 
+/**
+ * @api {post} / 0. 用户表
+ * @apiName user
+ * @apiGroup appUserGroup
+ * @apiSuccess {Number} userId 地址id
+ * @apiVersion 1.0.0
+ */
 class User extends Base{
     constructor () {
         super()

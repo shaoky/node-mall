@@ -3,7 +3,19 @@ import config from 'config'
 import CartModel from '../../../models/cart/index'
 import GoodsModel from '../../../models/goods/index'
 import BaseComponent from '../../../prototype/base'
+/**
+ * @apiDefine appCartGroup app-购物车模块
+ */
 
+/**
+ * @api {post} / 0. 购物车表
+ * @apiName cart
+ * @apiGroup appCartGroup
+ * @apiSuccess {Number} adId 广告id
+ * @apiSuccess {title} adId 广告标题
+ * @apiSuccess {Number} adTypeId 广告类型
+ * @apiVersion 1.0.0
+ */
 class Cart extends BaseComponent {
     constructor () {
         super()

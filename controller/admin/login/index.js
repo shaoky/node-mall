@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import AdminModel from '../../../models/admin/admin'
 import Base from '../../../prototype/base'
 
-class Login extends Base{
+class Login extends Base {
     constructor () {
         super()
         this.register = this.register.bind(this)

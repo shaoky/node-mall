@@ -2,6 +2,206 @@ define({ "api": [
   {
     "type": "post",
     "url": "/",
+    "title": "0. 广告表",
+    "name": "goods",
+    "group": "appAdGroup",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "adId",
+            "description": "<p>广告id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "adTypeId",
+            "description": "<p>广告类型</p>"
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "controller/app/ad/index.js",
+    "groupTitle": "app-广告模块"
+  },
+  {
+    "type": "post",
+    "url": "/address/add",
+    "title": "2. 地址新增",
+    "name": "addressAdd",
+    "group": "appAddressGroup",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>token</p>"
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "controller/app/user/address.js",
+    "groupTitle": "app-地址"
+  },
+  {
+    "type": "post",
+    "url": "/address/default",
+    "title": "3. 默认地址",
+    "name": "addressDefault",
+    "group": "appAddressGroup",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>token</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "data",
+            "description": "<p>见地址表</p>"
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "controller/app/user/address.js",
+    "groupTitle": "app-地址"
+  },
+  {
+    "type": "post",
+    "url": "/address/list",
+    "title": "1. 地址列表",
+    "name": "addressList",
+    "group": "appAddressGroup",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "page",
+            "defaultValue": "0",
+            "description": "<p>页面</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "size",
+            "defaultValue": "20",
+            "description": "<p>数量</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "data",
+            "description": "<p>见地址表</p>"
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "controller/app/user/address.js",
+    "groupTitle": "app-地址"
+  },
+  {
+    "type": "post",
+    "url": "/",
+    "title": "0. 地址表",
+    "name": "goods",
+    "group": "appAddressGroup",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "addressId",
+            "description": "<p>地址id</p>"
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "controller/app/user/address.js",
+    "groupTitle": "app-地址"
+  },
+  {
+    "type": "post",
+    "url": "/",
+    "title": "0. 购物车表",
+    "name": "cart",
+    "group": "appCartGroup",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "adId",
+            "description": "<p>广告id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "adTypeId",
+            "description": "<p>广告类型</p>"
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "controller/app/cart/index.js",
+    "groupTitle": "app-购物车模块"
+  },
+  {
+    "type": "post",
+    "url": "/",
     "title": "0. 商品表",
     "name": "goods",
     "group": "appGoodsGroup",
@@ -363,6 +563,76 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/order/cartPriview",
+    "title": "1. 购物车进入订单预览",
+    "name": "cartPriview",
+    "group": "appOrderGroup",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "cartId",
+            "description": "<p>购物车id</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "goodsList",
+            "description": "<p>见商品表</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "totalMoney",
+            "description": "<p>商品总金额</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "payMoney",
+            "description": "<p>支付金额</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "deliverMoney",
+            "description": "<p>运费</p>"
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "controller/app/order/index.js",
+    "groupTitle": "app-订单模块"
+  },
+  {
+    "type": "post",
     "url": "/order/goodsPriview",
     "title": "1. 产品详情进入订单预览",
     "name": "goodsPriview",
@@ -460,5 +730,64 @@ define({ "api": [
     "version": "1.0.0",
     "filename": "controller/app/order/index.js",
     "groupTitle": "app-订单模块"
+  },
+  {
+    "type": "post",
+    "url": "/",
+    "title": "0. 用户表",
+    "name": "user",
+    "group": "appUserGroup",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "userId",
+            "description": "<p>地址id</p>"
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "controller/app/user/index.js",
+    "groupTitle": "app-用户模块"
+  },
+  {
+    "type": "post",
+    "url": "/login",
+    "title": "1. 小程序登陆",
+    "name": "list",
+    "group": "appWxGroup",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "code",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "controller/app/wx/mini.js",
+    "groupTitle": "app-小程序模块"
   }
 ] });

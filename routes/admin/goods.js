@@ -10,4 +10,9 @@ router.post('/admin/goods/delete', Goods.delete)
 router.post('/admin/goods/update', Goods.update)
 router.post('/admin/goods/upload', BaseHandle.uploadImg)
 
+/**
+ * 商品规格
+ */
+router.post('/admin/goods/spec/add', Goods.goodsSpecAdd)
+
 export default router

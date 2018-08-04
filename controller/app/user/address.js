@@ -3,13 +3,13 @@ import AddressModel from '../../../models/user/address'
 import BaseComponent from '../../../prototype/base'
 
 /**
- * @apiDefine appAddresGroup app-地址
+ * @apiDefine appAddressGroup app-地址
  */
 
 /**
  * @api {post} / 0. 地址表
  * @apiName goods
- * @apiGroup appAddresGroup
+ * @apiGroup appAddressGroup
  * @apiSuccess {Number} addressId 地址id
  * @apiVersion 1.0.0
  */
@@ -46,7 +46,13 @@ class Address extends BaseComponent {
             })
         }
     }
-
+    /**
+     * @api {post} /address/add 2. 地址新增
+     * @apiName addressAdd
+     * @apiGroup appAddressGroup
+     * @apiHeader {String} Authorization token
+     * @apiVersion 1.0.0
+     */
     async add (req, res, next) {
         let form = req.body
         // try {

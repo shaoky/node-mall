@@ -1,18 +1,27 @@
 import mongoose from 'mongoose'
 import UserModel from '../../../models/user/user'
-import Base from '../../../prototype/base'
+import BaseComponent from '../../../prototype/base'
 import config from 'config'
 import jwt from 'jsonwebtoken'
+/**
+ * @apiDefine appWxGroup app-小程序模块
+ */
 
-class Mini extends Base {
+class Mini extends BaseComponent {
     constructor () {
         super()
         this.config = config.get('Customer.wx')
         this.login = this.login.bind(this)
     }
-
+    /**
+     * @api {post} /login 1. 小程序登陆
+     * @apiName list
+     * @apiGroup appWxGroup
+     * @apiHeader {String} Authorization token
+     * @apiParam {Number} code
+     * @apiVersion 1.0.0
+     */
     async login (req, res, next) {
-        console.log(req.body)
         let params = req.body
         let url = 'https://api.weixin.qq.com/sns/jscode2session'
         let data = {
@@ -24,8 +33,6 @@ class Mini extends Base {
         }
         let wx = await this.fetch(url, data)
 
-        
-        
         try {
             let tokenKey = config.get('Customer.global.tokenKey')
             let wxInfo = await UserModel.findOne({openid: wx.openid}, ['-id', '-sessionKey', '-openid'])

@@ -11,6 +11,8 @@ import BaseComponent from '../../../prototype/base'
  * @apiName goods
  * @apiGroup appAdGroup
  * @apiSuccess {Number} adId 广告id
+ * @apiSuccess {title} adId 广告标题
+ * @apiSuccess {Number} adTypeId 广告类型
  * @apiVersion 1.0.0
  */
 class Ad extends BaseComponent {
