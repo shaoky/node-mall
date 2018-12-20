@@ -7,11 +7,11 @@ const orderSchema = new Schema({
     orderId: Number, // 主键
     userId: Number, // 用户id
     orderNo: String, // 订单编号
-    orderStatus: { type: Number, default: 1}, // 1: 未付款 2: 待发货 3: 已发货 4：交易完成 5: 退款中
+    orderStatus: { type: Number, default: 1}, // 1: 未付款 2: 待发货 3: 已发货 4：交易完成 5: 退款中 6：已退款 7：已取消
     orderStatusName: String,
     totalMoney: String, // 总金额
     payMoney: String,
-    deliverMoney: Number, // 运费
+    freightMoney: Number, // 运费
     payType: Number, // 1：货到付款 2：在线支付
     goodsList: Array, // 商品
     isPay: { type: Boolean, default: false},

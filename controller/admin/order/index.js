@@ -24,9 +24,7 @@ class Order extends BaseComponent {
         this.orderGoodsPreview = this.orderGoodsPreview.bind(this)
         this.orderCartPreview = this.orderCartPreview.bind(this)
         this.orderAdd = this.orderAdd.bind(this)
-        this.userOrderList = this.userOrderList.bind(this)
-        this.userOrderInfo = this.userOrderInfo.bind(this)
-        this.userOrderStatusUpdate = this.userOrderStatusUpdate.bind(this)
+        this.setOrderStatus = this.setOrderStatus.bind(this)
     }
     /**
      * @api {post} /order/goodsPriview 1. 产品详情进入订单预览
@@ -42,7 +40,7 @@ class Order extends BaseComponent {
      * @apiVersion 1.0.0
      */
     async orderGoodsPreview (req, res, next) {
-        let userId = this.getUserId(req.get('Authorization'), res)
+        let userId = this.getUserId(req.get('Authorization'))
         let params = req.body
         // console.log(params.goodsIds)
         try {
@@ -70,19 +68,13 @@ class Order extends BaseComponent {
         goodsList.push(order)
 
         let payMoney = 0
-        let freightMoney = 0
-
-        if (params.goodsSpec) {
-            payMoney =  parseInt(params.goodsSpec.shopPrice) * parseInt(params.goodsNum)
-        } else {
-            payMoney =  parseInt(goodsInfo.shopPrice) * parseInt(params.goodsNum)
-        }
-        
+        let deliverMoney = 0
+        payMoney =  parseInt(goodsInfo.shopPrice) * parseInt(params.goodsNum)
        
-        if (payMoney > this.config.freeFreightMoney) {
-            freightMoney = 0
+        if (payMoney > 100) {
+            deliverMoney = 0
         } else {
-            freightMoney = this.config.freightMoney
+            deliverMoney = this.systemConfig().deliverMoney
         }
 
         let orderId
@@ -97,8 +89,8 @@ class Order extends BaseComponent {
             data: {
                 goodsList: goodsList,
                 totalMoney: payMoney,
-                payMoney: payMoney + freightMoney,
-                freightMoney: freightMoney
+                payMoney: payMoney + deliverMoney,
+                deliverMoney: deliverMoney
             }
         })
     }
@@ -116,7 +108,7 @@ class Order extends BaseComponent {
      * @apiVersion 1.0.0
      */
     async orderCartPreview (req, res, next) {
-        let userId = this.getUserId(req.get('Authorization'), res)
+        let userId = this.getUserId(req.get('Authorization'))
         let params = req.body
 
         try {
@@ -143,7 +135,7 @@ class Order extends BaseComponent {
         }
 
         let totalMoney = 0
-        let freightMoney = 0
+        let deliverMoney = 0
 
         for (let item of cartData.goodsList) {
             if (item.goodsSpec.openSpec) {
@@ -153,12 +145,10 @@ class Order extends BaseComponent {
             }
             item.goodsInfo.goodsImageFull = this.config.imageHost + item.goodsInfo.goodsImage
         }
-
-        // 运费
-        if (totalMoney > this.config.freeFreightMoney) {
-            freightMoney = 0
+        if (totalMoney > 100) {
+            deliverMoney = 0
         } else {
-            freightMoney = this.config.freightMoney
+            deliverMoney = this.systemConfig().deliverMoney
         }
 
         let orderId
@@ -173,8 +163,8 @@ class Order extends BaseComponent {
             data: {
                 totalMoney: totalMoney,
                 goodsList: cartData.goodsList,
-                payMoney: totalMoney + freightMoney,
-                freightMoney: freightMoney
+                payMoney: totalMoney + deliverMoney,
+                deliverMoney: deliverMoney
             }
         })
     }
@@ -229,15 +219,8 @@ class Order extends BaseComponent {
                     totalMoney += parseInt(item.goodsInfo.shopPrice) * parseInt(item.goodsNum)
                 }
             }
-            let freightMoney
-            // 运费
-            if (totalMoney > this.config.freeFreightMoney) {
-                freightMoney = 0
-            } else {
-                freightMoney = this.config.freightMoney
-            }
-            // let deliverMoney = this.systemConfig().deliverMoney
-            let payMoney = totalMoney + freightMoney
+            let deliverMoney = this.systemConfig().deliverMoney
+            let payMoney = totalMoney + deliverMoney
             
             await OrderModel.create({
                 orderId: orderId,
@@ -245,7 +228,7 @@ class Order extends BaseComponent {
                 orderNo: orderNo,
                 goodsList: params.goodsList,
                 userAddress: addressInfo,
-                freightMoney: freightMoney,
+                deliverMoney: deliverMoney,
                 totalMoney: totalMoney,
                 payMoney: payMoney,
                 orderRemarks: params.orderRemarks,
@@ -269,88 +252,9 @@ class Order extends BaseComponent {
     }
 
     /**
-     * 用户订单
-     */
-    async userOrderList (req, res, next) {
-        let userId = this.getUserId(req.get('Authorization'), res)
-        let { page = 0, size = 20, orderStatus = 0 } = req.body
-        let params = {
-            userId: userId,
-            orderStatus: orderStatus
-        }
-        if (orderStatus === 0) {
-            delete params.orderStatus
-        }
-        let list = await OrderModel.find(params, '-_id').sort({_id: -1}).skip(Number(page*size)).limit(Number(size))
-        // console.log(list)
-
-        let orderList = new Set(list)
-        // let orderList = list.map(item => {
-        //     console.log(typeof item.goodsList)
-        //     item.goodsList.goodsInfo.goodsImage = this.config.imageHost + item.goodsList.goodsInfo.goodsImage
-        //     return item
-        // })
-        for (let item of orderList) {
-            for (let item1 of item.goodsList) {
-                // console.log(item1)
-                item1.goodsInfo.goodsImage = this.config.imageHost + item1.goodsInfo.goodsImage
-            }
-            switch (item.orderStatus) {
-                case 1:
-                    item.orderStatusName = '待付款'
-                    break
-                case 2:
-                    item.orderStatusName = '待发货'
-                    break
-                case 3:
-                    item.orderStatusName = '待收货'
-                    break
-                case 7:
-                    item.orderStatusName = '已取消'
-                    break
-            }
-        }
-        res.send({
-            code: 200,
-            data: [...orderList]
-        })
-    }
-
-    async userOrderInfo (req, res, next) {
-        let userId = this.getUserId(req.get('Authorization'))
-        let orderId = req.body.orderId
-
-        if (!orderId || !Number(orderId)) {
-            console.log('orderId参数错误')
-            res.send({
-                code: 400,
-                message: '订单id参数错误'
-            })
-            return
-        }
-
-        
-        try {
-            let orderInfo = await OrderModel.findOne({userId: userId, orderId: orderId }, '-_id')
-            // console.log(orderInfo)
-            orderInfo.goodsImage = this.config.imageHost + orderInfo.goodsImage
-            res.send({
-                code: 200,
-                data: orderInfo
-            })
-        } catch (err) { 
-            console.log('err', err)
-            res.send({
-                code: 400,
-                message: '获取订单详情失败'
-            })
-        }
-    }
-
-    /**
      * 编辑订单状态
      */
-    async userOrderStatusUpdate (req, res, next) {
+    async setOrderStatus (req, res, next) {
         let userId = this.getUserId(req.get('Authorization'), res)
         let params = req.body
         
@@ -369,7 +273,6 @@ class Order extends BaseComponent {
             })
             return
         }
-        console.log(1)
 
         try {
             await OrderModel.findOneAndUpdate({userId: userId, orderId: params.orderId}, {$set: { orderStatus: params.orderStatus }})
@@ -382,6 +285,35 @@ class Order extends BaseComponent {
             res.send({
                 code: 400,
                 message: '更新失败'
+            })
+        }
+    }
+
+    async userOrderInfo (req, res, next) {
+        let userId = this.getUserId(req.get('Authorization'))
+        let orderId = req.body.orderId
+
+        if (!orderId || !Number(orderId)) {
+            console.log('orderId参数错误')
+            res.send({
+                code: 400,
+                message: '订单id参数错误'
+            })
+            return
+        }
+        
+        try {
+            let orderInfo = await OrderModel.findOne({userId: userId, orderId: orderId }, '-_id')
+            // console.log(orderInfo)
+            res.send({
+                code: 200,
+                data: orderInfo
+            })
+        } catch (err) { 
+            console.log('err', err)
+            res.send({
+                code: 400,
+                message: '获取订单详情失败'
             })
         }
     }

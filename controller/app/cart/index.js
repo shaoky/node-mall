@@ -19,11 +19,13 @@ import BaseComponent from '../../../prototype/base'
 class Cart extends BaseComponent {
     constructor () {
         super()
-        this.dbConfig = config.get('Customer.global')
+        this.global = config.get('Customer.global')
         this.cartList = this.cartList.bind(this)
         this.cartAdd = this.cartAdd.bind(this)
         this.cartDelete = this.cartDelete.bind(this)
         this.cartUpdate = this.cartUpdate.bind(this)
+        this.cartSelectedUpdate = this.cartSelectedUpdate.bind(this)
+        this.cartSelectedAllUpdate = this.cartSelectedAllUpdate.bind(this)
     }
     /*
     *
@@ -36,10 +38,16 @@ class Cart extends BaseComponent {
 
             if (list) {
                 for (let item of list.goodsList) {
-                    item.goodsInfo = await GoodsModel.findOne({id: item.goodsId}, '-_id')
-                    item.goodsInfo.goodsImage = this.dbConfig.imageHost + item.goodsInfo.goodsImage
+                    item.goodsInfo = await GoodsModel.findOne({goodsId: item.goodsId}, '-_id')
+                    if (item.goodsSpec.list) {
+                        item.openSpec = true
+                    }
+                    item.goodsInfo.goodsImage = this.global.imageHost + item.goodsInfo.goodsImage
                 }
+                list.freightMoney = this.global.freightMoney
+                list.freeFreightMoney = this.global.freeFreightMoney
             }
+           
             res.send({
                 code: 200,
                 data: list || []
@@ -48,16 +56,21 @@ class Cart extends BaseComponent {
             console.log('err', err)
             res.send({
                 code: 400,
-                message: '获取商品列表失败'
+                message: '获取购物车列表失败'
             })
         }
     }
 
     async cartAdd (req, res, next) {
-        let userId = this.getUserId(req.get('Authorization'))
+        let userId = this.getUserId(req.get('Authorization'), res)
         let params = req.body
         params.goodsId = parseInt(params.goodsId)
         params.goodsNum = parseInt(params.goodsNum)
+        if (params.goodsSpec.list) {
+            params.goodsSpec.openSpec = true
+        } else {
+            params.goodsSpec.openSpec = false
+        }
         try {
             if (!params.goodsId) {
                 throw new Error('商品id不存在');
@@ -73,22 +86,15 @@ class Cart extends BaseComponent {
             })
             return
         }
-
-        let cartId
-        try {
-            cartId = await this.getId('cart_id')
-        } catch (err) {
-            throw new Error(err)
-        }
-
+        
         let cartInfo = await CartModel.findOne({userId: userId}, '-_id')
         
-        // console.log(cartInfo)
+        // console.log('cartInfo', cartInfo)
         if (cartInfo) {
             // 判断购物车里，是否有商品了
             let isAdd = true
             cartInfo.goodsList.forEach(item => {
-                if (item.goodsId == params.goodsId) {
+                if (item.goodsId == params.goodsId && JSON.stringify(item.goodsSpec.list.sort()) === JSON.stringify(params.goodsSpec.list.sort())) {
                     item.goodsNum = item.goodsNum + params.goodsNum
                     isAdd = false
                 }
@@ -96,9 +102,18 @@ class Cart extends BaseComponent {
 
             if (isAdd) {
                 try {
+                    let cartGoodsId
+                    try {
+                        cartGoodsId = await this.getId('cart_goods_id')
+                    } catch (err) {
+                        throw new Error(err)
+                    }
                     let goods = {
+                        cartGoodsId: cartGoodsId,
                         goodsId: params.goodsId,
-                        goodsNum: params.goodsNum
+                        goodsNum: params.goodsNum,
+                        goodsSpec: params.goodsSpec,
+                        selected: false
                     }
                     cartInfo.goodsList.push(goods)
                     await CartModel.findOneAndUpdate({userId: userId}, {$set: {goodsList: cartInfo.goodsList}})
@@ -118,10 +133,26 @@ class Cart extends BaseComponent {
             })
         } else {
             try {
+                let cartId
+                try {
+                    cartId = await this.getId('cart_id')
+                } catch (err) {
+                    throw new Error(err)
+                }
+
+                let cartGoodsId
+                try {
+                    cartGoodsId = await this.getId('cart_goods_id')
+                } catch (err) {
+                    throw new Error(err)
+                }
                 let goodsList = []
                 let goods = {
+                    cartGoodsId: cartGoodsId,
                     goodsId: params.goodsId,
-                    goodsNum: params.goodsNum
+                    goodsNum: params.goodsNum,
+                    goodsSpec: params.goodsSpec,
+                    selected: false
                 }
                 goodsList.push(goods)
                 await CartModel.create({
@@ -146,13 +177,13 @@ class Cart extends BaseComponent {
 
     async cartDelete (req, res, next) {
         let userId = this.getUserId(req.get('Authorization'))
-        let goodsId = req.body.goodsId
+        let cartGoodsId = req.body.cartGoodsId
 
-        if (!goodsId || !Number(goodsId)) {
-            console.log('goodsId参数错误')
+        if (!cartGoodsId || !Number(cartGoodsId)) {
+            console.log('cartGoodsId参数错误')
             res.send({
                 code: 400,
-                message: 'id参数错误'
+                message: 'Id参数错误'
             })
             return
         }
@@ -162,7 +193,7 @@ class Cart extends BaseComponent {
             
             let list = new Set(cartInfo.goodsList)
             for (let item of list) {
-                if (item.goodsId === goodsId) {
+                if (item.cartGoodsId === cartGoodsId) {
                     list.delete(item)
                 }
             }
@@ -184,8 +215,8 @@ class Cart extends BaseComponent {
         let params = req.body
         
         try {
-            if (!params.goodsId || !Number(params.goodsId)) {
-                throw new Error('goodsId参数错误');
+            if (!params.cartGoodsId || !Number(params.cartGoodsId)) {
+                throw new Error('cartGoodsId参数错误');
             }
             if (params.goodsNum < 1 || !Number(params.goodsNum)) {
                 throw new Error('商品数量不能低于1');
@@ -204,11 +235,71 @@ class Cart extends BaseComponent {
             console.log(cartInfo)
             // let list = new Set(cartInfo.goodsList)
             for (let item of cartInfo.goodsList) {
-                if (item.goodsId === params.goodsId) {
+                if (item.cartGoodsId === params.cartGoodsId) {
                     item.goodsNum = params.goodsNum
                 }
             }
             console.log(cartInfo.goodsList)
+            await CartModel.findOneAndUpdate({userId: userId}, {$set: {goodsList: cartInfo.goodsList}})
+            res.send({
+                code: 200,
+                message: '修改成功'
+            })
+        } catch (err) {
+            res.send({
+                code: 400,
+                message: '修改失败'
+            })
+        }
+    }
+
+    async cartSelectedUpdate (req, res, next) {
+        let userId = this.getUserId(req.get('Authorization'))
+        let cartGoodsId = req.body.cartGoodsId
+        let selected = req.body.selected
+        try {
+            if (!cartGoodsId || !Number(cartGoodsId)) {
+                throw new Error('cartGoodsId参数错误')
+            }
+        } catch (err) {
+            console.log('前台参数错误:', err.message)
+            res.send({
+                code: 400,
+                message: err.message
+            })
+            return
+        }
+
+        try {
+            let cartInfo = await CartModel.findOne({userId: userId}, '-_id')
+            for (let item of cartInfo.goodsList) {
+                if (item.cartGoodsId === cartGoodsId) {
+                    item.selected = selected
+                }
+            }
+            await CartModel.findOneAndUpdate({userId: userId}, {$set: {goodsList: cartInfo.goodsList}})
+            res.send({
+                code: 200,
+                message: '修改成功'
+            })
+        } catch (err) {
+            console.log('err:', err)
+            res.send({
+                code: 400,
+                message: '修改失败'
+            })
+        }
+    }
+
+    async cartSelectedAllUpdate (req, res, next) {
+        let userId = this.getUserId(req.get('Authorization'))
+        let selected = req.body.selected
+        
+        try {
+            let cartInfo = await CartModel.findOne({userId: userId}, '-_id')
+            for (let item of cartInfo.goodsList) {
+                    item.selected = selected
+            }
             await CartModel.findOneAndUpdate({userId: userId}, {$set: {goodsList: cartInfo.goodsList}})
             res.send({
                 code: 200,

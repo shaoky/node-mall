@@ -36,6 +36,7 @@ class Mini extends BaseComponent {
         try {
             let tokenKey = config.get('Customer.global.tokenKey')
             let wxInfo = await UserModel.findOne({openid: wx.openid}, ['-id', '-sessionKey', '-openid'])
+            console.log(wxInfo)
             if (wxInfo) {
                 let token = jwt.sign({id: wxInfo.userId}, tokenKey)
                 wxInfo.token = token
@@ -54,7 +55,7 @@ class Mini extends BaseComponent {
                 }
                 let token = jwt.sign({id: userId}, tokenKey)
                 await UserModel.create({
-                    userId: wxInfo.userId,
+                    userId: userId,
                     openid: wx.openid,
                     sessionKey: wx.session_key,
                     nickname: params.nickname,

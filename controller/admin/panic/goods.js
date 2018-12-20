@@ -1,11 +1,9 @@
 import mongoose from 'mongoose'
 import config from 'config'
-import GoodsModel from '../../../models/goods/index'
-import GoodsAttrModel from '../../../models/goods/attr'
+import PanicGoodsModel from '../../../models/panic/goods'
 import BaseComponent from '../../../prototype/base'
-import GoodsAttr from '../../../models/goods/attr';
 
-class Goods extends BaseComponent {
+class PanicGoods extends BaseComponent {
     constructor () {
         super()
         this.add = this.add.bind(this)
@@ -13,8 +11,11 @@ class Goods extends BaseComponent {
     async list (req, res, next) {
         const dbConfig = config.get('Customer.dbConfig')
         const {page = 0, size = 20} = req.query
+        let search = {
+            isOpen: true
+        }
         try {
-            let list = await GoodsModel.find({}, '-_id').sort({order: -1}).skip(Number(page*size)).limit(Number(size))
+            let list = await PanicGoodsModel.find(search, '-_id').sort({order: -1}).skip(Number(page*size)).limit(Number(size))
             list.forEach(item => {
                 item.goodsImage = dbConfig.host + item.goodsImage
             })
@@ -32,11 +33,19 @@ class Goods extends BaseComponent {
     }
 
     async add (req, res, next) {
-        console.log(req.body)
         let params = req.body
         try {
-            if (!params.goodsName) {
-                throw new Error('请输入标题');
+            if (!params.goodsId) {
+                throw new Error('请选择商品')
+            }
+            if (!params.panicMoney) {
+                throw new Error('请输入抢购价')
+            }
+            if (!params.panicMoney) {
+                throw new Error('请输入抢购价')
+            }
+            if (!params.goodsStock) {
+                throw new Error('请输入商品库存')
             }
         } catch (err) {
             console.log('前台参数错误:', err.message)
@@ -47,46 +56,24 @@ class Goods extends BaseComponent {
             return
         }
 
-        let goodsId
+        let panicGoodsId
         try {
-            goodsId = await this.getId('goods_id')
+            panicGoodsId = await this.getId('panic_goods_id')
         } catch (err) {
-            console.log('goods_id失败')
-            throw new Error(err)
-        }
-
-        let goodsAttrId
-        try {
-            goodsAttrId = await this.getId('goods_attr_id')
-        } catch (err) {
-            console.log('goodsAttrId失败')
+            console.log('panicGoodsId失败')
             throw new Error(err)
         }
 
         try {
-            await GoodsModel.create({
-                goodsId: goodsId,
-                goodsAttrId: goodsAttrId,
-                goodsName: params.goodsName,
-                goodsImage: params.goodsImage || '',
-                goodsThums: params.goodsThums || '',
-                goodsImageBanner: params.goodsImageBanner || [],
-                goodsImageDetail: params.goodsImageDetail || [],
-                goodsSpec: params.goodsSpec,
-                marketPrice: params.marketPrice || 0,
-                shopPrice: params.shopPrice || 0,
-                goodsStock: params.goodsStock || 0,
-                saleCount: params.saleCount || 0,
-                goodsDesc: params.goodsDesc || '',
-                goodsStatus: params.goodsStatus || 0,
+            await PanicGoodsModel.create({
+                panicGoodsId: panicGoodsId,
+                goodsId: params.goodsId,
+                panicMoney: params.panicMoney,
+                goodsStock: params.goodsStock,
+                goodsSales: params.goodsSales,
+                goodsVirtualSales: params.goodsVirtualSales || 0,
+                isOpen: params.isOpen,
                 order: params.order || 100,
-                createTime: parseInt(new Date() / 1000)
-            })
-
-            await GoodsAttrModel.create({
-                goodsAttrId: goodsAttrId,
-                goodsId: goodsId,
-                attrList: params.goodsAttr,
                 createTime: parseInt(new Date() / 1000)
             })
 
@@ -182,7 +169,8 @@ class Goods extends BaseComponent {
 
     set (req, res, next) {
         console.log(req.body)
-    }   
+    }
+
 }
 
-export default new Goods()
+export default new PanicGoods()

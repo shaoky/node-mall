@@ -10,6 +10,6 @@ router.post('/order/add', Order.orderAdd)
 router.post('/user/order/list', Order.userOrderList)
 router.post('/user/order/info', Order.userOrderInfo)
 // router.post('/order/delete', Order.cartDelete)
-// router.post('/order/update', Order.cartUpdate)
+router.post('/user/order/status/update', Order.userOrderStatusUpdate)
 
 export default router

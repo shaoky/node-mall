@@ -16,6 +16,7 @@ import BaseComponent from '../../../prototype/base'
 class Address extends BaseComponent {
     constructor () {
         super()
+        this.list = this.list.bind(this)
         this.add = this.add.bind(this)
         this.getAddressDefault = this.getAddressDefault.bind(this)
         this.setAddressDefault = this.setAddressDefault.bind(this)
@@ -31,9 +32,10 @@ class Address extends BaseComponent {
      * @apiVersion 1.0.0
      */
     async list (req, res, next) {
+        let userId = this.getUserId(req.get('Authorization'))
         const {page = 0, size = 20} = req.body
         try {
-            let list = await AddressModel.find({}, '-_id').skip(Number(page*size)).limit(Number(size))
+            let list = await AddressModel.find({userId: userId}, '-_id').skip(Number(page*size)).limit(Number(size))
             res.send({
                 code: 200,
                 data: list
@@ -106,6 +108,7 @@ class Address extends BaseComponent {
     }
 
     async delete (req, res, next) {
+        let userId = this.getUserId(req.get('Authorization'))
         let addressId = req.body.id
         if (!addressId || !Number(addressId)) {
             console.log('goodsId参数错误')
@@ -117,7 +120,7 @@ class Address extends BaseComponent {
         }
 
         try {
-            let del = await AddressModel.findOneAndRemove({ addressId: addressId })
+            let del = await AddressModel.findOneAndRemove({ userId: userId, addressId: addressId })
             if (del) {
                 res.send({
                     code: 200,
@@ -153,7 +156,7 @@ class Address extends BaseComponent {
         let userId = this.getUserId(req.get('Authorization'))
         try {
             let addressInfo = await AddressModel.findOne({userId: userId}, '-_id')
-            console.log(addressInfo)
+            // console.log(addressInfo)
             if (addressInfo) {
                 res.send({
                     code: 200,

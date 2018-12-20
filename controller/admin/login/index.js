@@ -8,7 +8,7 @@ class Login extends Base {
         super()
         this.register = this.register.bind(this)
     }
-    index (req, res, next) {
+    async index (req, res, next) {
         const params = req.body
         console.log('登录参数---------', params)
         if (params.userName == '') {
@@ -25,20 +25,16 @@ class Login extends Base {
             })
             return
         }
-        AdminModel.findOne({
-            userName: params.userName
-        }, (err, user) => {
-            if (err) {
-                throw err
-            }
+
+        try {
+            let user = await AdminModel.findOne({userName: params.userName})
             if (!user) {
                 res.send({
-                    code: 0,
+                    code: 400,
                     message: '用户不存在'
                 })
                 return
             }
-
             // 检查密码是否正确
             if (params.password == user.password) {
                 user.token = jwt.sign({name: user.name}, 'shaoky')
@@ -47,6 +43,8 @@ class Login extends Base {
                         res.send(err)
                     }
                 })
+
+                // console.log(req.connection.remoteAddress) // 获取客服端ip
                 res.send({
                     data: {
                         user: {
@@ -61,7 +59,48 @@ class Login extends Base {
                     message: '密码错误'
                 })
             }
-        })
+        } catch (err) {
+            console.log(err)
+        }
+        // AdminModel.findOne({
+        //     userName: params.userName
+        // }, (err, user) => {
+        //     if (err) {
+        //         throw err
+        //     }
+        //     if (!user) {
+        //         res.send({
+        //             code: 0,
+        //             message: '用户不存在'
+        //         })
+        //         return
+        //     }
+
+        //     // 检查密码是否正确
+        //     if (params.password == user.password) {
+        //         user.token = jwt.sign({name: user.name}, 'shaoky')
+        //         user.save((err) => {
+        //             if (err) {
+        //                 res.send(err)
+        //             }
+        //         })
+
+        //         console.log(req.connection)
+        //         res.send({
+        //             data: {
+        //                 user: {
+        //                     token: user.token
+        //                 }
+        //             },
+        //             code: 200
+        //         })
+        //     } else {
+        //         res.send({
+        //             code: 400,
+        //             message: '密码错误'
+        //         })
+        //     }
+        // })
     }
     async register (req, res, next) {
         const userName = req.body.userName

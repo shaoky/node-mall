@@ -9,7 +9,7 @@ import jwt from 'jsonwebtoken'
 
 export default class BaseComponent {
     constructor () {
-		this.idList = ['image_id', 'ad_id', 'ad_type_id', 'admin_id', 'goods_id', 'user_id', 'address_id', 'cart_id', 'order_id']
+		this.idList = ['image_id', 'ad_id', 'ad_type_id', 'article_id', 'article_type_id', 'admin_id', 'goods_id', 'goods_spec_id', 'user_id', 'address_id', 'browse_id', 'collection_id', 'cart_id', 'cart_goods_id', 'order_id']
 		this.uploadImg = this.uploadImg.bind(this)
 	}
 
@@ -65,7 +65,14 @@ export default class BaseComponent {
 
 	// 获取用户id
 
-	getUserId (token) {
+	getUserId (token, res) {
+		if (!token) {
+			res.send({
+				code: 401,
+				message: '请登陆账号'
+			})
+			return
+		}
         let tokenKey = config.get('Customer.global.tokenKey')
         let decoded = jwt.verify(token, tokenKey)
 		let userId = decoded.id
@@ -75,11 +82,11 @@ export default class BaseComponent {
 
     //获取id列表
 	async getId(type){
-		if (!this.idList.includes(type)) {
-			console.log('id类型错误');
-			throw new Error('id类型错误');
-			return
-		}
+		// if (!this.idList.includes(type)) {
+		// 	console.log('id类型错误');
+		// 	throw new Error('id类型错误');
+		// 	return
+		// }
 		try {
 			const idData = await ids.findOne()
 			idData[type] ++

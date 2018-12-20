@@ -1,11 +1,9 @@
 import mongoose from 'mongoose'
 import config from 'config'
-import GoodsModel from '../../../models/goods/index'
-import GoodsAttrModel from '../../../models/goods/attr'
+import PanicModel from '../../../models/panic/index'
 import BaseComponent from '../../../prototype/base'
-import GoodsAttr from '../../../models/goods/attr';
 
-class Goods extends BaseComponent {
+class Panic extends BaseComponent {
     constructor () {
         super()
         this.add = this.add.bind(this)
@@ -13,8 +11,11 @@ class Goods extends BaseComponent {
     async list (req, res, next) {
         const dbConfig = config.get('Customer.dbConfig')
         const {page = 0, size = 20} = req.query
+        let search = {
+            isOpen: true
+        }
         try {
-            let list = await GoodsModel.find({}, '-_id').sort({order: -1}).skip(Number(page*size)).limit(Number(size))
+            let list = await PanicModel.find(search, '-_id').sort({order: -1}).skip(Number(page*size)).limit(Number(size))
             list.forEach(item => {
                 item.goodsImage = dbConfig.host + item.goodsImage
             })
@@ -35,8 +36,8 @@ class Goods extends BaseComponent {
         console.log(req.body)
         let params = req.body
         try {
-            if (!params.goodsName) {
-                throw new Error('请输入标题');
+            if (!params.title) {
+                throw new Error('请输入抢购活动标题')
             }
         } catch (err) {
             console.log('前台参数错误:', err.message)
@@ -47,46 +48,31 @@ class Goods extends BaseComponent {
             return
         }
 
-        let goodsId
+        // let goodsId
+        // try {
+        //     goodsId = await this.getId('goods_id')
+        // } catch (err) {
+        //     console.log('goods_id失败')
+        //     throw new Error(err)
+        // }
+
+        let goodsPanicId
         try {
-            goodsId = await this.getId('goods_id')
+            goodsPanicId = await this.getId('goods_panic_id')
         } catch (err) {
-            console.log('goods_id失败')
+            console.log('goodsSpecId失败')
             throw new Error(err)
         }
 
-        let goodsAttrId
         try {
-            goodsAttrId = await this.getId('goods_attr_id')
-        } catch (err) {
-            console.log('goodsAttrId失败')
-            throw new Error(err)
-        }
-
-        try {
-            await GoodsModel.create({
-                goodsId: goodsId,
-                goodsAttrId: goodsAttrId,
-                goodsName: params.goodsName,
-                goodsImage: params.goodsImage || '',
-                goodsThums: params.goodsThums || '',
-                goodsImageBanner: params.goodsImageBanner || [],
-                goodsImageDetail: params.goodsImageDetail || [],
-                goodsSpec: params.goodsSpec,
-                marketPrice: params.marketPrice || 0,
-                shopPrice: params.shopPrice || 0,
-                goodsStock: params.goodsStock || 0,
-                saleCount: params.saleCount || 0,
-                goodsDesc: params.goodsDesc || '',
-                goodsStatus: params.goodsStatus || 0,
+            await PanicModel.create({
+                goodsPanicId: goodsPanicId,
+                title: params.title,
+                desc: params.desc,
+                startTime: params.startTime,
+                endTime: params.endTime,
+                isOpen: params.isOpen,
                 order: params.order || 100,
-                createTime: parseInt(new Date() / 1000)
-            })
-
-            await GoodsAttrModel.create({
-                goodsAttrId: goodsAttrId,
-                goodsId: goodsId,
-                attrList: params.goodsAttr,
                 createTime: parseInt(new Date() / 1000)
             })
 
@@ -182,7 +168,67 @@ class Goods extends BaseComponent {
 
     set (req, res, next) {
         console.log(req.body)
-    }   
+    }
+
+    /**
+     * 抢购商品
+     */
+    async add (req, res, next) {
+        let params = req.body
+        try {
+            if (!params.title) {
+                throw new Error('请输入抢购活动标题')
+            }
+        } catch (err) {
+            console.log('前台参数错误:', err.message)
+            res.send({
+                code: 403,
+                message: err.message
+            })
+            return
+        }
+
+        // let goodsId
+        // try {
+        //     goodsId = await this.getId('goods_id')
+        // } catch (err) {
+        //     console.log('goods_id失败')
+        //     throw new Error(err)
+        // }
+
+        let goodsPanicId
+        try {
+            goodsPanicId = await this.getId('goods_panic_id')
+        } catch (err) {
+            console.log('goodsSpecId失败')
+            throw new Error(err)
+        }
+
+        try {
+            await PanicModel.create({
+                goodsPanicId: goodsPanicId,
+                title: params.title,
+                desc: params.desc,
+                startTime: params.startTime,
+                endTime: params.endTime,
+                isOpen: params.isOpen,
+                order: params.order || 100,
+                createTime: parseInt(new Date() / 1000)
+            })
+
+            res.send({
+                code: 200,
+                message: '添加成功'
+            })
+        } catch (err) {
+            console.log(err)
+            res.send({
+                code: 400,
+                message: '添加失败'
+            })
+        }
+    }
+
 }
 
-export default new Goods()
+export default new Panic()

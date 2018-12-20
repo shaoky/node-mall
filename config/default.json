@@ -2,14 +2,17 @@
   // Customer module configs
   "Customer": {
     "dbConfig": {
-      "host": "http://192.168.3.58:3000/",
+      // "host": "http://192.168.3.58:3000/",
+      "host": "http://shaoky.mynatapp.cc/",
       "port": 5984,
       "dbName": "customers"
     },
     "global": {
-      "imageHost": "http://192.168.3.58:3000/images/",
-      // "imageHost": "https://shaoky.mynatapp.cc/images/",
-      "tokenKey": "shaoky"
+      // "imageHost": "http://192.168.3.58:3000/images/",
+      "imageHost": "https://shaoky.mynatapp.cc/images/",
+      "tokenKey": "shaoky",
+      "freeFreightMoney": 88,
+      "freightMoney": 10
     },
     "wx": {
       "appid": "wxfc52cc97c9caf877",

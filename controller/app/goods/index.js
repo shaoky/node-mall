@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import config from 'config'
 import goodsModel from '../../../models/goods/index'
+import goodsAttrModel from '../../../models/goods/attr'
 import BaseComponent from '../../../prototype/base'
 
 /**
@@ -85,8 +86,16 @@ class Goods extends BaseComponent {
      */
     async goodsInfo (req, res, next) {
         let params = req.body
+        if (!params.goodsId || !Number(params.goodsId)) {
+            console.log('goodsId参数错误')
+            res.send({
+                code: 400,
+                message: '商品不存在'
+            })
+            return
+        }
         try {
-            let goodsInfo = await goodsModel.findOne({id: params.id}, '-_id')
+            let goodsInfo = await goodsModel.findOne({goodsId: params.goodsId}, '-_id')
             goodsInfo.goodsImage = this.dbConfig.imageHost + goodsInfo.goodsImage
             goodsInfo.goodsImageBanner = goodsInfo.goodsImageBanner.map(item => {
                 return this.dbConfig.imageHost + item
@@ -94,6 +103,9 @@ class Goods extends BaseComponent {
             goodsInfo.goodsImageDetail = goodsInfo.goodsImageDetail.map(item => {
                 return this.dbConfig.imageHost + item
             })
+            // 获取商品属性
+            let goodsAttr = await goodsAttrModel.findOne({goodsId: params.goodsId}, '-_id')
+            goodsInfo.goodsAttr = goodsAttr.attrList
             res.send({
                 code: 200,
                 data: goodsInfo

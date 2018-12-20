@@ -9,7 +9,6 @@ class Ad extends BaseComponent {
     }
 
     async list (req, res, next) {
-        // console.log(req.query)
         const {page = 1, size = 0} = req.query
         try {
             const adList = await AdModel.find({}, '-_id').sort({order: -1}).skip(Number(page)).limit(Number(size))
