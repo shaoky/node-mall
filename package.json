@@ -20,7 +20,7 @@
     "gm": "^1.23.1",
     "jsonwebtoken": "^8.2.1",
     "moment": "^2.22.2",
-    "mongoose": "^5.1.5",
+    "mongoose": "^5.7.5",
     "morgan": "^1.9.0",
     "node-fetch": "^2.2.0"
   },
