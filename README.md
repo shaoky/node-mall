@@ -5,7 +5,7 @@
 ## 安装
 
 1、依赖安装---npm install<br/>
-2、热更新安装-npm install nondemon -g<br/>
+2、热更新安装-npm install nodemon -g<br/>
 3、操作数据库安装-npm install mongoose<br/>
 
 ## 目录结构
