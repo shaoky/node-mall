@@ -18,7 +18,7 @@
     "express": "^4.16.2",
     "formidable": "^1.2.1",
     "gm": "^1.23.1",
-    "jsonwebtoken": "^8.2.1",
+    "jsonwebtoken": "^9.0.0",
     "moment": "^2.22.2",
     "mongoose": "^5.1.5",
     "morgan": "^1.9.0",
